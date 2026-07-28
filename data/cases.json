@@ -1,0 +1,32 @@
+[
+  {
+    "id": "TC01",
+    "description": "Registro exitoso con todos los campos válidos",
+    "steps": [
+      { "action": "goto", "url": "/" },
+      { "action": "fill", "selector": "#name", "value": "Juan Pérez" },
+      { "action": "fill", "selector": "#email", "value": "juan.perez@example.com" },
+      { "action": "fill", "selector": "#password", "value": "Password123" },
+      { "action": "fill", "selector": "#confirm-password", "value": "Password123" },
+      { "action": "check", "selector": "#terms" },
+      { "action": "click", "selector": "#submit-btn" },
+      { "action": "assertVisible", "selector": "#success-message" }
+    ],
+    "expected": "Se oculta el formulario y se muestra el mensaje de éxito."
+  },
+  {
+    "id": "TC02",
+    "description": "Las contraseñas no coinciden",
+    "steps": [
+      { "action": "goto", "url": "/" },
+      { "action": "fill", "selector": "#name", "value": "Juan Pérez" },
+      { "action": "fill", "selector": "#email", "value": "juan.perez@example.com" },
+      { "action": "fill", "selector": "#password", "value": "Password123" },
+      { "action": "fill", "selector": "#confirm-password", "value": "Password456" },
+      { "action": "check", "selector": "#terms" },
+      { "action": "click", "selector": "#submit-btn" },
+      { "action": "assertText", "selector": "#confirm-error", "value": "Las contraseñas no coinciden." }
+    ],
+    "expected": "Se muestra el error 'Las contraseñas no coinciden.' junto al campo de confirmar contraseña, y ningún otro campo."
+  }
+]
