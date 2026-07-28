@@ -16,7 +16,7 @@ import {
 } from '../../shared/types.js';
 
 const CASES_PATH = new URL('../../data/cases.json', import.meta.url);
-const BASE_URL = process.env.TARGET_APP_URL ?? 'http://localhost:5173';
+export const BASE_URL = process.env.TARGET_APP_URL ?? 'http://localhost:5173';
 
 export async function validateCase(
   testCase: TestCase,

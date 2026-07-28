@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "validate": "tsx src/validate-cases.ts"
+    "validate": "tsx src/validate-cases.ts",
+    "test": "tsx src/run-tests.ts"
   },
   "devDependencies": {
     "@types/node": "^22.7.0",
