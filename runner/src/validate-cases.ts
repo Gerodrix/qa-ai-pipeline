@@ -7,6 +7,7 @@
 // confusing Playwright timeout later, deep inside a real test run.
 
 import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 import { chromium, type Page } from 'playwright';
 import {
   hasSelector,
@@ -81,6 +82,9 @@ async function main() {
 
 // Only run the CLI when this file is executed directly — not when
 // run-tests.ts imports validateCases() to reuse this same check.
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL (instead of a manual `file://${...}` string) is what
+// makes this comparison work on Windows too — it normalizes backslashes,
+// drive letters, and spaces the same way import.meta.url already does.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }
