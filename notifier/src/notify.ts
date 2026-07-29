@@ -7,6 +7,7 @@
 // something actually failed). Keeping that decision in n8n, not here, is
 // the point: it's the piece meant to demonstrate orchestration.
 
+import 'dotenv/config';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { RunResult } from '../../shared/types.js';
