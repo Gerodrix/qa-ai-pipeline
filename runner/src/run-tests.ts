@@ -12,7 +12,8 @@ import type { CaseResult, RunResult, TestCase, TestStep } from '../../shared/typ
 import { BASE_URL, validateCases } from './validate-cases.js';
 
 const DATA_DIR = fileURLToPath(new URL('../../data/', import.meta.url));
-const CASES_PATH = `${DATA_DIR}cases.json`;
+const CASES_FILE = process.env.CASES_FILE ?? 'cases.json';
+const CASES_PATH = `${DATA_DIR}${CASES_FILE}`;
 const RESULTS_PATH = `${DATA_DIR}results.json`;
 const SCREENSHOTS_DIR = `${DATA_DIR}screenshots/`;
 
