@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Pipeline con IA</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>QA Pipeline con IA</h1>
+    <p class="subtitle">
+      Genera casos de prueba con un LLM, pero valida cada selector contra
+      el DOM real antes de ejecutar nada.
+    </p>
+    <a class="repo-link" href="https://github.com/Gerodrix/qa-ai-pipeline" target="_blank" rel="noopener">
+      Ver repo en GitHub →
+    </a>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-button active" data-tab="overview">Overview</button>
+    <button class="tab-button" data-tab="target-app">Demo: Target App</button>
+    <button class="tab-button" data-tab="dashboard">Demo: Dashboard</button>
+  </nav>
+
+  <main>
+    <section id="overview" class="tab-panel active">
+      <h2>El problema</h2>
+      <p>
+        Un LLM puede alucinar un selector que no existe en la página. Sin
+        validarlo antes de ejecutar, el resultado es un timeout confuso de
+        Playwright — no queda claro si falló la app o si el test estaba
+        mal escrito de entrada.
+      </p>
+      <p>
+        Este pipeline separa esos dos problemas en capas explícitas: primero
+        valida que el JSON generado tenga la forma correcta, después valida
+        que los selectores existan en el DOM real, y recién ahí ejecuta.
+      </p>
+
+      <h2>Decisiones de diseño</h2>
+      <ul>
+        <li>Sin agente autónomo de navegador — la validación explícita antes de ejecutar es el diferencial.</li>
+        <li>Playwright "pelado" en todo el runner, sin mezclar con el framework de tests.</li>
+        <li>La decisión de "esto amerita alerta en Slack" vive en n8n, no en el código.</li>
+        <li><code>results.json</code> plano y append-only — sin base de datos, a propósito.</li>
+      </ul>
+
+      <p class="readme-link">
+        Más detalle (arquitectura, cómo correrlo, stack) en el
+        <a href="https://github.com/Gerodrix/qa-ai-pipeline#readme" target="_blank" rel="noopener">README completo →</a>
+      </p>
+    </section>
+
+    <section id="target-app" class="tab-panel">
+      <h2>Target App — la app bajo prueba</h2>
+      <iframe src="../target-app/dist/index.html" title="Target App" loading="lazy"></iframe>
+    </section>
+
+    <section id="dashboard" class="tab-panel">
+      <h2>Dashboard — historial de corridas</h2>
+      <iframe src="../dashboard/index.html" title="Dashboard" loading="lazy"></iframe>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>

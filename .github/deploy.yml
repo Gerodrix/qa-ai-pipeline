@@ -1,0 +1,68 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build target-app
+        working-directory: target-app
+        run: |
+          npm ci
+          npm run build
+
+      # Only the pieces the site actually needs end up published — not
+      # node_modules, not the TypeScript sources, not runner/notifier/generator
+      # (those aren't static, they need a real Node process to run).
+      - name: Assemble Pages output
+        run: |
+          mkdir -p pages-output
+          cp -r site pages-output/site
+          cp -r dashboard pages-output/dashboard
+          cp -r data pages-output/data
+          mkdir -p pages-output/target-app
+          cp -r target-app/dist pages-output/target-app/dist
+          cat > pages-output/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head><meta http-equiv="refresh" content="0; url=./site/" /></head>
+            <body>Redirigiendo a <a href="./site/">./site/</a>...</body>
+          </html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages-output
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

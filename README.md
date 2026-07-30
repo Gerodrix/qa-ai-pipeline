@@ -21,6 +21,8 @@ Este pipeline separa esos dos problemas en capas explícitas:
 Si un caso falla en el paso 1 o 2, queda marcado como inválido con el
 motivo exacto — nunca llega a ejecutarse ni genera una falla ambigua.
 
+**Demo en vivo**: https://gerodrix.github.io/qa-ai-pipeline/
+
 ## Arquitectura
 
 ```mermaid
