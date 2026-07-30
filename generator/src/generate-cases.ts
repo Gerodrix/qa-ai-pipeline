@@ -18,12 +18,12 @@
 import 'dotenv/config';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 import type { TestCase } from '../../shared/types.js';
 import { TARGET_APP_SPEC } from './target-app-spec.js';
 
 const OUTPUT_PATH = fileURLToPath(new URL('../../data/generated-cases.json', import.meta.url));
-const MODEL = process.env.GENERATOR_MODEL ?? 'claude-sonnet-5';
+const MODEL = process.env.GENERATOR_MODEL ?? 'gemini-2.5-flash';
 
 const VALID_ACTIONS = ['goto', 'fill', 'click', 'check', 'assertVisible', 'assertText'] as const;
 
@@ -151,27 +151,23 @@ function parseJsonArray(text: string): unknown[] {
 }
 
 async function main() {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     throw new Error(
-      'Falta ANTHROPIC_API_KEY. Copiá generator/.env.example a .env y completá tu API key real.',
+      'Falta GEMINI_API_KEY. Copiá generator/.env.example a .env y completá tu API key real ' +
+        '(gratis, sin tarjeta, en https://aistudio.google.com/app/apikey).',
     );
   }
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   console.log(`Generando casos con ${MODEL}...`);
 
-  const response = await client.messages.create({
+  const response = await ai.models.generateContent({
     model: MODEL,
-    max_tokens: 4096,
-    messages: [{ role: 'user', content: buildPrompt() }],
+    contents: buildPrompt(),
   });
 
-  const text = response.content
-    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-    .map((block) => block.text)
-    .join('');
-
+  const text = response.text ?? '';
   const rawCases = parseJsonArray(text);
 
   const validCases: TestCase[] = [];
