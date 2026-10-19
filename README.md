@@ -185,3 +185,5 @@ Remove-Item Env:CASES_FILE
 La demo pública es estática: no representa una ejecución reciente de IA ni prueba que la integración con servicios externos funcione. La generación, n8n y Slack requieren validación por separado.
 
 Ver [CONTRIBUTING.md](CONTRIBUTING.md) para ramas, commits y revisión.
+
+La publicación de la demo requiere ejecutar manualmente su workflow. Integrar mantenimiento en main no inicia una publicación. El workflow de CI y Repository policy validan los cambios por separado.

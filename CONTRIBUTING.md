@@ -42,3 +42,22 @@ npm --prefix target-app run build
 Cada PR debe explicar el problema, la solución y qué se probó realmente. Un build correcto no equivale a una revisión visual o a una prueba integral del producto. Documentá los pendientes; no declares mediciones o pruebas que no realizaste.
 
 La integración de cambios y cualquier publicación se revisan por separado. No agregues un despliegue como efecto secundario de una tarea de mantenimiento.
+
+## Controles automáticos para cambios nuevos
+
+Para activar los avisos antes de cada commit en este clon (solo requiere Node.js y Git):
+
+```sh
+node scripts/install-git-hooks.mjs
+```
+
+El instalador conserva cualquier configuración de hooks existente y se detiene si detecta una diferente. Los hooks revisan el contenido que agregaste al índice y el mensaje del commit. Un mensaje debe usar `tipo(área opcional): descripción`, con una acción de al menos dos palabras y diez caracteres; el título completo puede tener hasta 100 caracteres. Se admiten español, inglés y los mensajes de merge o revert generados por Git. No se revisan ni se reescriben mensajes históricos.
+
+`Repository policy` comprueba además el título del PR y los commits nuevos de la rama, rechaza credenciales locales y carpetas generadas versionadas y exige dependencias exactas con un lockfile coherente. Cambiar el título del PR vuelve a ejecutar el control. Los hooks son una ayuda local; el workflow funciona aunque no los instales. Estos controles detectan problemas concretos y no garantizan por sí solos la calidad del código.
+
+```sh
+node scripts/check-repository.mjs --repository
+node --test scripts/repository-policy.test.mjs
+```
+
+Para integrar, el método previsto es squash con el título validado del PR como mensaje de commit. Las protecciones de `main` y las opciones de merge son configuración de GitHub y deben verificarse por separado; la presencia de este archivo no significa que ya estén activas.
