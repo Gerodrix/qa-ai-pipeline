@@ -5,3 +5,11 @@ data/screenshots/
 data/results.json
 *.log
 .DS_Store
+
+# Local credentials and editor state
+.env.*
+!.env.example
+.dev.vars*
+!.dev.vars.example
+.vs/
+*.tsbuildinfo

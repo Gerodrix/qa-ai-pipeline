@@ -134,7 +134,7 @@ async function main() {
   saveResult(runResult);
   printSummary(runResult);
 
-  if (runResult.failed > 0) process.exitCode = 1;
+  if (runResult.failed > 0 || runResult.invalid > 0) process.exitCode = 1;
 }
 
 main();

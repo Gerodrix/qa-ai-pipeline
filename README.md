@@ -55,9 +55,7 @@ flowchart LR
 - **`data/results.json` es un archivo plano, append-only.** Sin base de
   datos — para el volumen y el propósito de este proyecto, sumar
   infraestructura ahí sería sobre-ingeniería.
-- **El webhook de n8n corre sin autenticación.** Es correcto mientras
-  todo esté en `localhost` (nadie de afuera puede alcanzarlo); para un
-  deploy real, correspondería sumar Header Auth.
+- **La integración de n8n se documenta para un entorno local de desarrollo.** No se incluye un workflow exportado ni una configuración de autenticación validada. No expongas el webhook sin revisar su autenticación y alcance.
 
 ## Estructura
 
@@ -74,13 +72,13 @@ qa-ai-pipeline/
 
 ## Cómo correrlo
 
-Requisito: Node.js 18+.
+Requisito: Node.js 22 y npm. Las validaciones de CI usan esa versión.
 
 ### 1. Levantar la app bajo prueba
 
 ```bash
 cd target-app
-npm install
+npm ci
 npm run dev
 ```
 
@@ -92,7 +90,7 @@ En otra terminal:
 
 ```bash
 cd runner
-npm install
+npm ci
 npx playwright install chromium   # solo la primera vez
 npm run validate   # chequea que los selectores existan, sin ejecutar nada
 npm run test        # ejecuta de verdad y guarda en data/results.json
@@ -113,8 +111,8 @@ Abrir `http://localhost:3000/dashboard/`.
 
 ```bash
 cd generator
-npm install
-cp .env.example .env   # completar GEMINI_API_KEY (gratis, sin tarjeta)
+npm ci
+cp .env.example .env   # completar GEMINI_API_KEY de tu cuenta
 npm run generate
 ```
 
@@ -135,7 +133,7 @@ Requiere una instancia de n8n corriendo con el workflow armado (Webhook
 
 ```bash
 cd notifier
-npm install
+npm ci
 cp .env.example .env   # completar N8N_WEBHOOK_URL
 npm run notify
 ```
@@ -146,10 +144,7 @@ Honesto sobre lo que falta o tiene una limitación conocida:
 
 - El mensaje de Slack llega con algunas variables vacías — pendiente de
   revisar la configuración de expresiones en el nodo de n8n.
-- La API de Gemini está devolviendo un error 403 conocido y reportado
-  por otros usuarios en proyectos nuevos — parece un bug del lado de
-  Google, no de este proyecto; se resuelve solo o se puede migrar a
-  otro proveedor (el cambio es chico, ver `generator/src/generate-cases.ts`).
+- La generación con Gemini requiere credenciales y acceso al modelo. Una respuesta 403 debe investigarse según los permisos, la configuración y la respuesta de la API; la causa no está verificada. El CI usa casos de control locales y no llama al proveedor.
 - El dashboard muestra el `data/results.json` local — para que "viva"
   en un deploy público necesitaría un job programado que corra los
   tests y actualice el archivo periódicamente (no implementado).
@@ -157,3 +152,38 @@ Honesto sobre lo que falta o tiene una limitación conocida:
 ## Stack
 
 Node.js, TypeScript, Playwright, Vite, Google Gemini API, n8n, Slack.
+
+## Validación reproducible
+
+Instalá los cuatro módulos desde la raíz y verificá sus tipos:
+
+```sh
+npm --prefix generator ci
+npm --prefix notifier ci
+npm --prefix runner ci
+npm --prefix target-app ci
+npm --prefix generator run typecheck
+npm --prefix notifier run typecheck
+npm --prefix runner run typecheck
+npm --prefix target-app run typecheck
+npm --prefix target-app run build
+npm --prefix runner exec -- playwright install chromium
+node scripts/check-runner.mjs
+```
+
+El último comando inicia una app local aislada, espera a que responda, valida los selectores, ejecuta los casos de control y una regresión con un selector inexistente, y cierra el servidor al terminar. No llama a Gemini, n8n ni Slack. Un caso fallido o inválido produce código de salida 1. CI conserva los resultados como artefactos.
+
+En PowerShell, para probar casos generados:
+
+```powershell
+$env:CASES_FILE = 'generated-cases.json'
+npm --prefix runner run validate
+npm --prefix runner test
+Remove-Item Env:CASES_FILE
+```
+
+La demo pública es estática: no representa una ejecución reciente de IA ni prueba que la integración con servicios externos funcione. La generación, n8n y Slack requieren validación por separado.
+
+Ver [CONTRIBUTING.md](CONTRIBUTING.md) para ramas, commits y revisión.
+
+La publicación de la demo requiere ejecutar manualmente su workflow. Integrar mantenimiento en main no inicia una publicación. El workflow de CI y Repository policy validan los cambios por separado.
