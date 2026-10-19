@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            generator/package-lock.json
+            notifier/package-lock.json
+            runner/package-lock.json
+            target-app/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          npm --prefix generator ci
+          npm --prefix notifier ci
+          npm --prefix runner ci
+          npm --prefix target-app ci
+      - name: Typecheck all modules and build target app
+        run: |
+          npm --prefix generator run typecheck
+          npm --prefix notifier run typecheck
+          npm --prefix runner run typecheck
+          npm --prefix target-app run typecheck
+          npm --prefix target-app run build
+      - name: Install Chromium
+        working-directory: runner
+        run: npx playwright install --with-deps chromium
+      - name: Validate selectors and run control cases
+        run: node scripts/check-runner.mjs
+      - name: Keep test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-results
+          path: |
+            data/results.json
+            data/screenshots
+          if-no-files-found: ignore
